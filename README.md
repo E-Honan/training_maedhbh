@@ -11,3 +11,4 @@ Coursework for ADC Reproducible Practices in R course
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
+# This is the line on which to create a merge error 
