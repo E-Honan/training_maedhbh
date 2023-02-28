@@ -2,6 +2,8 @@
 
 ## git workflow explained 
 
+This is a demo commit to show how Ellie can make edits to her README that Luan can see. 
+
 Coursework for ADC Reproducible Practices in R course
 
 [![Project Status: WIP – Initial development is in progress, but there
