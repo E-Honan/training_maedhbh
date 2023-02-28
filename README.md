@@ -3,7 +3,6 @@
 ## git workflow explained 
 
 This is a demo commit to show how Ellie can make edits to her README that Luan can see. 
-changes here
 
 Coursework for ADC Reproducible Practices in R course
 
