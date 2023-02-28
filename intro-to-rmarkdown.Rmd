@@ -1,0 +1,87 @@
+---
+title: "Intro to RMarkdown ADC"
+author: "Ellie Honan"
+date: "2023-02-27"
+output: html_document
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Plain text
+
+whether you *have* any **time** or location constraints (we want to make these experiences as accessible to people as possible so please let us know, for example, if a shorter trip of a couple of days would suit you better than a week trip, or if you ~~have~~ any physical/mobility issues that might restrict where you can visit/the terrain you can work in. Please also indicate how far you would be willing to travel\*)
+
+# Big header
+
+## Small header
+
+### Smaller header
+
+###### Smaller header
+
+...
+
+> test block quote
+
+| Table Header | Second Header |
+|--------------|---------------|
+| Table Cell   | Cell 2        |
+| Cell 3       | Cell 4        |
+
+1.  test ordered list
+2.  test item 2
+    -   test sub-item 1
+    -   test sub-item 2
+
+This is a very interesting fact[@lato2023]
+
+| Table Header | Second Header |
+|--------------|---------------|
+| Table Cell   | Cell 2        |
+| Cell 3       | Cell 4        |
+
+| column 1 | Col2 | Col3 |
+|----------|------|------|
+| Item 1   |      |      |
+| item 2   |      |      |
+|          |      |      |
+
+: Example of a table
+
+inline equation: $A = \pi*r^{2}$
+
+summary(penguins)
+
+```{r echo=FALSE}
+install.packages("palmerpenguins")
+library(palmerpenguins)
+summary(penguins)
+```
+
+```{r eval=TRUE, echo=FALSE}
+paste("Hello", "World!") 
+```
+
+```{r}
+x <- 4*4
+
+summary(penguins)
+```
+
+The shortcut to install a code chunk is ctrl alt what she went so fast
+
+
+
+
+
+
+
+
+
+
+
+
+
