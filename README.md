@@ -1,4 +1,7 @@
 # training_maedhbh
+
+## git workflow explained 
+
 Coursework for ADC Reproducible Practices in R course
 
 [![Project Status: WIP – Initial development is in progress, but there
