@@ -127,7 +127,7 @@ head(n_region)
 
 ```
 
-## Lesson of *filtering*
+## Lesson on *filtering*
 
 ```{r}
 ALU_catch <- catch_long %>% 
