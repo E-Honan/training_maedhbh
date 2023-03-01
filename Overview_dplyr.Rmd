@@ -1,0 +1,231 @@
+---
+title: "Overview_dplyr"
+author: "Ellie Honan"
+date: "2023-03-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Libraries
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(readr)
+```
+
+## Load Data
+
+```{r}
+catch_original <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1", method = "libcurl"))
+```
+
+The *select* command from the dyplyr package selects **columns**
+
+The *filter* command from the dyplyr package filters **rows**
+
+## Clean Data
+
+```{r}
+#r emove the All and notesRegCode columns from the catch_original data frame
+catch_data <- catch_original %>% 
+  select(Region, Year, Chinook, Sockeye, Coho, Pink, Chum)
+# or
+# catch_data <- catch_original %>% 
+#  select(-All, -notesRegCode)
+
+head(catch_data)
+glimpse(catch_data)
+```
+
+```{r}
+# Mutate Chinook class from character to numeric
+catch_clean <- catch_data %>% 
+  mutate(Chinook = as.numeric(Chinook))
+
+# search for the na value that gave the warning
+i <- which(is.na(catch_clean$Chinook))
+# call it
+i
+#check that line in the original df - it's a I rather than a 1
+catch_data[i,]
+
+# change the l to a 1
+
+catch_clean <- catch_data %>% 
+  mutate(Chinook = if_else(Chinook == "I", "1", Chinook)) %>% 
+  mutate(Chinook = as.integer(Chinook))
+
+glimpse(catch_clean)
+```
+
+## Change shape of data using *pivot_longer* and *pivot_wider*
+
+```{r}
+# pivot longer practice
+catch_long <- catch_clean %>% 
+  pivot_longer(cols = -c(Region, Year), names_to = "species", values_to ="catch")
+View(catch_long)
+# names_to == column names that will go into a new column. In the case above, 
+# a new column called "species"
+
+# values_to == values from within those columns, into a new column. 
+# In the case above, a new column called "catch"
+
+# pivot wider practice 
+catch_wide <- catch_long %>% 
+  pivot_wider(names_from = species, values_from = catch)
+View(catch_wide)
+
+# so this reverts it back 
+```
+
+## Practice *renaming* columns
+
+```{r}
+catch_long <- catch_long %>% 
+  rename(catch_thousands = catch)
+
+head(catch_long)
+```
+
+## Add columns with *mutate* function
+
+```{r}
+catch_long <- catch_long %>% 
+  mutate(catch = catch_thousands * 1000)
+head(catch_long)
+
+
+# remove catch_thousands
+catch_long <- catch_long %>% 
+  mutate(catch = catch_thousands * 1000) %>% 
+  select(-catch_thousands)
+
+head(catch_long)
+```
+
+## Practice using *group_by* and *summarise*
+
+```{r}
+mean_region <- catch_long %>% 
+  group_by(Region) %>% 
+  summarise(catch_mean = mean(catch))
+
+head(mean_region)
+
+# summarise count by region 
+n_region <- catch_long %>% 
+  group_by(Region) %>%
+  summarise(number_of_observations = n(), 
+ total_catch = sum(catch)) # number of rows of each group
+
+head(n_region)
+
+```
+
+## Lesson of *filtering*
+
+```{r}
+ALU_catch <- catch_long %>% 
+  filter(Region == "ALU")
+
+nrow(ALU_catch)
+
+```
+
+## Arrange some rows with *arrange*
+
+```{r}
+# this arranges data by default smallest to largest
+mean_region_arrange <- catch_long %>% 
+  group_by(Region) %>% 
+  summarise(mean_catch = mean(catch)) %>% 
+  arrange(mean_catch)
+# if it was largest to smallest it would be: 
+#   arrange(desc(mean_catch))
+
+head(mean_region_arrange)
+
+```
+
+## Practicing *joins*
+
+```{r}
+# loading in the byerlyRegionDegs.csv file
+# remember this is the mac operator, would need to add url stuff from above
+region_defs <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+    select(code, mgmtArea)
+
+head(region_defs)
+```
+
+## Join our data
+
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by = c("Region" = "code"))
+
+head(catch_joined)
+
+```
+
+```{r}
+region_defs <- region_defs %>% 
+  rename(Region = code, Region_Name = mgmtArea)
+
+catch_joined <- left_join(catch_long, region_defs, by = "Region")
+
+head(catch_joined)
+```
+
+## Practice with *seperate()* and *unite()*
+
+```{r}
+sites_df <- data.frame(site = c("HAW-101",
+                                "HAW-103",
+                                "OAH-320",
+                                "OAH-219",
+                                "MAI-039"))
+
+sites_df %>%
+  separate(site, c("island", "site_number"), "-")
+
+```
+
+```{r}
+# Unite things back together
+dates_df <- data.frame(year = c("1930",
+                                "1930",
+                                "1930"),
+                       month = c("12",
+                                "12",
+                                "12"),
+                       day = c("14",
+                               "15",
+                               "16"))
+
+head(dates_df)
+
+dates_df %>% 
+  unite(date, year, month, day, sep = "-")
+# could also use / in place of - 
+```
+
+## Exercise: \*Split the city column in the following data.frame into city and state_code columns\*
+
+```{r}
+cities_df <- data.frame(city = c("Juneau AK", 
+                                 "Sitka AK", 
+                                 "Anchorage AK"))
+
+head(cities_df)
+
+cities_df %>%
+  separate(city, c("city", "state code"), " ")
+
+head(cities_df)
+
+```
