@@ -10,5 +10,6 @@ Coursework for ADC Reproducible Practices in R course
 has not yet been a stable, usable release suitable for the
 public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 
+Site from which to sort badges: https://shields.io/
 
 # This is the line on which the merge error is fixed
