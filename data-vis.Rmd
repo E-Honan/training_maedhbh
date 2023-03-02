@@ -101,7 +101,7 @@ ggplot(annual_esc,
 
 ## `ggplot` and the pipe operator
 
-Annual escapement from Kodiak by species 
+Annual escapement from Kodiak by species
 
 ```{r}
 annual_esc %>% 
@@ -112,6 +112,7 @@ annual_esc %>%
          geom_line()+
          geom_point()
 ```
+
 ## Customize our plot using `theme_`
 
 ```{r}
@@ -147,9 +148,10 @@ ggplot(kodiak_esc,
          legend.title = element_blank())
    
 ```
+
 ## Saving my custom theme
 
-This is really useful - especially for a report where you want all the plots to look similar. 
+This is really useful - especially for a report where you want all the plots to look similar.
 
 ```{r}
 #setting the theme
@@ -170,7 +172,8 @@ ggplot(kodiak_esc,
    ggtitle("Kodiak Salmon Escapement") +
    my_theme
 ```
-## Fixing the axis numbers using `scale` 
+
+## Fixing the axis numbers using `scale`
 
 ```{r}
 ggplot(kodiak_esc, 
@@ -186,7 +189,7 @@ ggplot(kodiak_esc,
    my_theme
 ```
 
-## Saving my plot 
+## Saving my plot
 
 Saving into a high res .png. Ggsave by default saves the last plot run (can fix this by giving the plot a name)
 
@@ -196,7 +199,7 @@ ggsave("kodiak_esc.png", width = 12, height = 3, units = "in")
 
 ## Creating multiple plots
 
-Plotting escapement throughout years by region for each species 
+Plotting escapement throughout years by region for each species
 
 ```{r}
 ggplot(annual_esc, 
@@ -213,6 +216,7 @@ ggplot(annual_esc,
   ylab("Escapement") + 
   my_theme
 ```
+
 ```{r}
 ggplot(annual_esc, 
        aes(x = Year, 
@@ -228,4 +232,3 @@ ggplot(annual_esc,
   ylab("Escapement") + 
   theme_minimal() 
 ```
-
