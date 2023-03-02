@@ -1,0 +1,231 @@
+---
+title: "Data Visualisation"
+author: "Ellie Honan"
+date: "2023-03-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data visualization with ggplot \<3
+
+## Load Libraries
+
+```{r}
+ library(leaflet)
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(DT)
+  library(scales) # install.packages("scales")
+```
+
+## Read Data
+
+```{r}
+data_url <- "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%3Auuid%3Af119a05b-bbe7-4aea-93c6-85434dcb1c5e"
+
+esc <- tryCatch(
+    read.csv("data/escapement.csv"),
+    error=function(cond) {
+        message(paste("Escapement file does not seem to exist, so get it from the KNB."))
+        esc <- read.csv(url(data_url, method = "libcurl"))
+        return(esc)
+    }
+)
+
+head(esc)
+```
+
+Challenge: *Now that we have the data loaded, use your dplyr and tidyr skills to calculate annual escapement by species and region. Hint: try to use separate to extract the year, month, and day from the date column.*
+
+```{r}
+
+#my attempt
+esc_df <- esc %>%
+  separate(sampleDate, c("year", "month", "day"), "-") 
+
+annual_esc <- esc_df %>% 
+  group_by(Species, SASAP.Region) %>% 
+  summarise(annual_escape = mean(DailyCount))
+
+
+
+# answer
+annual_esc <- esc %>% 
+  # because I want the year
+  separate(sampleDate, c("Year", "Month", "Day"), sep = "-") %>% 
+  # make the year column numeric because it was a character 
+  mutate(Year = as.numeric(Year)) %>% 
+  # because we want annual escapement by species per region
+  group_by(Species, SASAP.Region, Year) %>% 
+  # calculate the sum of yearly escapements
+  summarize(escapement = sum(DailyCount)) %>%
+  # this isn't part of the instructions, just pulling out the salmon species for plotting
+  # using %in% because filtering for more than one variable
+  filter(Species %in% c("Chinook", "Sockeye", "Chum", "Coho", "Pink"))
+
+# double checking what species are present using unique()
+unique(annual_esc$Species)
+
+```
+
+## Static figures using ggplot
+
+**Basic** `ggplot` **figure**:
+
+```{r}
+ggplot(annual_esc, 
+       aes(x = Species, y = escapement)) +
+  geom_col()
+```
+
+Basic plot with **blue** bars:
+
+```{r}
+ggplot(annual_esc,
+       aes(x = Species, y = escapement)) + 
+       geom_col(fill = "deepskyblue")
+```
+
+Plotting escapement for each species by region:
+
+```{r}
+ggplot(annual_esc, 
+           aes(x = Species, y = escapement, 
+           fill = SASAP.Region)) + 
+           geom_col()
+```
+
+## `ggplot` and the pipe operator
+
+Annual escapement from Kodiak by species 
+
+```{r}
+annual_esc %>% 
+  filter(SASAP.Region == "Kodiak") %>% 
+  ggplot(aes(x = Year, 
+             y = escapement, 
+             color = Species)) +
+         geom_line()+
+         geom_point()
+```
+## Customize our plot using `theme_`
+
+```{r}
+kodiak_esc <- annual_esc %>% 
+  filter(SASAP.Region == "Kodiak")
+# note: the "==" is a double operator that looks for true/false. 
+```
+
+```{r}
+ggplot(kodiak_esc, 
+       aes(x = Year, 
+           y = escapement, 
+           color = Species)) +
+   geom_line() + 
+   geom_point() +
+   ylab("Escapement") +
+   ggtitle("Kodiak Salmon Escapement") +
+   theme_bw()
+    
+```
+
+```{r}
+ggplot(kodiak_esc, 
+       aes(x = Year, 
+           y = escapement, 
+           color = Species)) +
+   geom_line() + 
+   geom_point() +
+   ylab("Escapement") +
+   theme_bw() +
+#note: the theme() function needs to go after theme_ as it can get overwritten 
+   theme(legend.position = "bottom", 
+         legend.title = element_blank())
+   
+```
+## Saving my custom theme
+
+This is really useful - especially for a report where you want all the plots to look similar. 
+
+```{r}
+#setting the theme
+my_theme <- theme_bw() + 
+  theme(legend.position = "bottom", 
+         legend.title = element_blank())
+```
+
+```{r}
+#adding the theme to a plot
+ggplot(kodiak_esc, 
+       aes(x = Year, 
+           y = escapement, 
+           color = Species)) +
+   geom_line() + 
+   geom_point() +
+   ylab("Escapement") +
+   ggtitle("Kodiak Salmon Escapement") +
+   my_theme
+```
+## Fixing the axis numbers using `scale` 
+
+```{r}
+ggplot(kodiak_esc, 
+       aes(x = Year, 
+           y = escapement, 
+           color = Species)) +
+   geom_line() + 
+   geom_point() +
+  #arrrgh this fixes the annoying 'e' thing!
+   scale_y_continuous(labels = comma) +
+   ylab("Escapement") +
+   ggtitle("Kodiak Salmon Escapement") +
+   my_theme
+```
+
+## Saving my plot 
+
+Saving into a high res .png. Ggsave by default saves the last plot run (can fix this by giving the plot a name)
+
+```{r}
+ggsave("kodiak_esc.png", width = 12, height = 3, units = "in")
+```
+
+## Creating multiple plots
+
+Plotting escapement throughout years by region for each species 
+
+```{r}
+ggplot(annual_esc, 
+       aes(x = Year, 
+           y = escapement, 
+           color = Species)) + 
+       geom_line() +
+       geom_point() + 
+       scale_y_continuous(labels = comma) +
+       facet_wrap(~SASAP.Region, 
+                  #free scale on the y axis
+                  scale = "free_y", 
+                  ncol = 2) + 
+  ylab("Escapement") + 
+  my_theme
+```
+```{r}
+ggplot(annual_esc, 
+       aes(x = Year, 
+           y = escapement, 
+           color = Species)) + 
+       geom_line() +
+       geom_point() + 
+       scale_y_continuous(labels = comma) +
+       facet_wrap(~SASAP.Region, 
+                  #free scale on the y axis
+                  scale = "free_y", 
+                  ncol = 2) + 
+  ylab("Escapement") + 
+  theme_minimal() 
+```
+
